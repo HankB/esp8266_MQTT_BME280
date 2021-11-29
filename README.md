@@ -43,11 +43,12 @@ Not fully functional.
 * Attach to AP works (Using WPA2.)
 * Connection to broker works.
 * Publishing a message works.
-* Subscribing to a topic does not work.
-* Connection to broker drops with
+* ~~Subscribing to a topic does not work.~~
+* ~~Connection to broker drops with~~
 
 ```text
 1638200439: Client ESP8266Client-c67c has exceeded timeout, disconnecting.
 ```
 
-Same code works when built with Arduino platform.
+* Working as desired after renaming `src/mqtt_esp8266.ino` to `src/main.cpp`.
+
