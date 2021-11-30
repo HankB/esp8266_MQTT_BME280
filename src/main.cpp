@@ -170,7 +170,9 @@ void loop() {
   if (now - lastMsg > 2000) {
     lastMsg = now;
     ++value;
-    snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
+    snprintf (msg, MSG_BUFFER_SIZE, "temp:%.2f, press:%.0f, humid:%.1f", 
+      bme.readTemperature()/5*9+32.0,
+      bme.readPressure()/100, bme.readHumidity());
     Serial.print("Publish message: ");
     Serial.println(msg);
     client.publish("outTopic", msg);
