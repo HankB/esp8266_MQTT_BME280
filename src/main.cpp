@@ -20,6 +20,10 @@
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <Wire.h>
+//#include <SPI.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
 
 #include "secrets.h"
 /* secrets.h should define the following as appropriate for your network.
@@ -28,6 +32,7 @@ const char* password = "...";
 const char* mqtt_server = "host.domain"; // "<host>.localddomain" works for me.
 */
 
+#define SEALEVELPRESSURE_HPA (1013.25)
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -35,6 +40,9 @@ unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE	(50)
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
+Adafruit_BME280 bme; // I2C
+unsigned long delayTime;
+
 
 void setup_wifi() {
 
@@ -60,6 +68,22 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
+void setup_BME280(void) {
+  // configure BME280/I2C
+  Wire.begin(D3, D4); // Make sure you have D3 & D4 hooked up to the BME280
+  Wire.setClock(100000);
+  unsigned status = bme.begin(0x76);
+  if (!status) {
+      Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
+      Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
+      Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
+      Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
+      Serial.print("        ID of 0x60 represents a BME 280.\n");
+      Serial.print("        ID of 0x61 represents a BME 680.\n");
+      while (1) delay(10);
+  }
+}
+
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -77,7 +101,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   } else {
     digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
   }
-
 }
 
 void reconnect() {
@@ -104,10 +127,34 @@ void reconnect() {
   }
 }
 
+void printValues(void) {
+    Serial.print("Temperature = ");
+    Serial.print(bme.readTemperature());
+    Serial.println(" °C");
+
+    Serial.print("Pressure = ");
+
+    Serial.print(bme.readPressure() / 100.0F);
+    Serial.println(" hPa");
+
+    Serial.print("Approx. Altitude = ");
+    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+    Serial.println(" m");
+
+    Serial.print("Humidity = ");
+    Serial.print(bme.readHumidity());
+    Serial.println(" %");
+
+    Serial.println();
+}
+
+
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   Serial.begin(115200);
+  while(!Serial);    // time to get serial running
   setup_wifi();
+  setup_BME280();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
 }
@@ -127,5 +174,6 @@ void loop() {
     Serial.print("Publish message: ");
     Serial.println(msg);
     client.publish("outTopic", msg);
+    printValues();
   }
 }
