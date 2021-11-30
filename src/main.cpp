@@ -32,7 +32,8 @@ const char* password = "...";
 const char* mqtt_server = "host.domain"; // "<host>.localddomain" works for me.
 */
 
-#define serial_IO 0     // control compilation of serial I/O
+#define serial_IO 1     // control compilation of serial I/O
+// NOTE: currently turning off Serial I/O rsults in an app that does not work.
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -173,10 +174,10 @@ void printValues(void) {
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
-//#if serial_IO
+#if serial_IO
   Serial.begin(115200);
   while(!Serial);    // time to get serial running
-//#endif
+#endif
   setup_wifi();
   setup_BME280();
   client.setServer(mqtt_server, 1883);

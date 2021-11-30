@@ -38,6 +38,10 @@ Development has been performed on Debian Linux and using the `mosquitto` MQTT br
 * Publish BME280 readings
 * Conditional serial I/O (working only with serial enabled)
 
+## Errata
+
+Removing all serial output causes the app to misbehave. I've spent over an hour trying to sort that and am setting it aside for the moment.
+ 
 ## Build reports
 
 Build reports now in a [separate page](Build_Reports.md)
