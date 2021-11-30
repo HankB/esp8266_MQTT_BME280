@@ -8,7 +8,7 @@ Hardware is `NodeMCU 1.0 (ESP-12E Module)`.
 
 ## Credits
 
-Code is originally copied from Nick O'Leary's repository for the pubsubclient and can be seen at https://github.com/knolleary/pubsubclient/tree/master/examples/mqtt_esp8266
+Code to support MQTT is originally copied from Nick O'Leary's repository for the pubsubclient and can be seen at https://github.com/knolleary/pubsubclient/tree/master/examples/mqtt_esp8266. Code to read the BME280 os copied from an example at <https://platformio.org/lib/show/166/Adafruit%20BME280%20Library> and some settings from <https://github.com/optio50/ESP8266-NodeMCU-12E-with-BME280> (see <https://github.com/HankB/Arduino_BME280_NodeMCU_ESP-12E>.)
 
 ## Motivation
 
