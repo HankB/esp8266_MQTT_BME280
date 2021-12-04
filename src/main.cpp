@@ -42,6 +42,7 @@ unsigned long lastMsg = 0;
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
 Adafruit_BME280 bme; // I2C
+time_t      world_time;
 
 void setup_wifi() {
 
@@ -103,6 +104,7 @@ void setup_BME280(void) {
   }
 }
 
+// Parse timestamp from inbound message
 void callback(char* topic, byte* payload, unsigned int length) {
 #if serial_IO
   Serial.print("Message arrived [");
@@ -114,6 +116,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println();
 #endif
 
+  char buff[100];
+  length = (length>99)?99:length;
+  for (unsigned int i = 0; i < length; i++)
+    buff[i] = (char)payload[i];
+  buff[length] = '\0';
+
+  world_time = atol(buff);
   // Switch on the LED if an 1 was received as first character
   if ((char)payload[0] == '1')
     digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on
@@ -194,8 +203,8 @@ void loop() {
   unsigned long now = millis();
   if (now - lastMsg > 2000) {
     lastMsg = now;
-    snprintf (msg, MSG_BUFFER_SIZE, "temp:%.2f, press:%.0f, humid:%.1f", 
-      bme.readTemperature()/5*9+32.0,
+    snprintf (msg, MSG_BUFFER_SIZE, "t:%lld, temp:%.2f, press:%.0f, humid:%.1f", 
+      world_time, bme.readTemperature()/5*9+32.0,
       bme.readPressure()/100, bme.readHumidity());
     client.publish("outTopic", msg);
 #if serial_IO
