@@ -54,7 +54,8 @@ The BME280 uses a 3V3 supply. This test is being performed on an ESP8266 mini wh
 
 ## Errata
 
-Removing all serial output causes the app to misbehave. I've spent over an hour trying to sort that and am setting it aside for the moment.
+* Removing all serial output causes the app to misbehave. I've spent over an hour trying to sort that and am setting it aside for the moment.
+* Adding NTP support was surprisingly easy as it's already built into the Arduino runtime.
  
 ## Build reports
 
