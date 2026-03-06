@@ -34,9 +34,23 @@ Development has been performed on Debian Linux and using the `mosquitto` MQTT br
 
 ## Status
 
+* 2026-03-05 Builds and runs using VS Code/PlatformIO. (After installing udev rules <https://docs.platformio.org/en/latest/core/installation/udev-rules.html>.) Connected a BME280 as described below and MQTT messages are published along with readings to the serial console.
 * Test imported (unchanged) project - works
 * Publish BME280 readings
 * Conditional serial I/O (working only with serial enabled)
+
+## Todo
+
+For my particular application:
+
+* Get time from an NTP server.
+* Format payload as JSON.
+* Set timing of samples to 1/minute.
+* The code comes up with a unique hostname based on the MAC address `ESP-533BE6`. Find the api to fetch the hostname to include in the topic.
+
+## 2026-03-05 wiring
+
+The BME280 uses a 3V3 supply. This test is being performed on an ESP8266 mini whiuch has 3V3 closest to the reset pushbutton. Ground is next to the 5V pin. Pin marked D4/mini goes to SCL/BME280 and pin D3/mini goes to SDA/BME280.
 
 ## Errata
 
