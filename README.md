@@ -34,6 +34,7 @@ Development has been performed on Debian Linux and using the `mosquitto` MQTT br
 
 ## Status
 
+* 2026-03-06 Finished for now. Application publishes 1/min using topic and payuload formats that meet my desired. There is some tailoring required to use my "production" AP and MQTT broker and tweak the topic.
 * 2026-03-05 Fetching time from an NTP server.
 * 2026-03-05 Builds and runs using VS Code/PlatformIO. (After installing udev rules <https://docs.platformio.org/en/latest/core/installation/udev-rules.html>.) Connected a BME280 as described below and MQTT messages are published along with readings to the serial console.
 * Test imported (unchanged) project - works
@@ -46,10 +47,7 @@ For my particular needs the topic will look like `HA/{hostname}/{location or ID?
 
 ## Todo
 
-For my particular application:
-
-* Set timing of samples to 1/minute.
-* Add sleep to main loop?
+* Publish some kind of error message when the BME280 cannot be initialized (instead of a hard lockup.)
 
 ## 2026-03-05 wiring
 
@@ -59,7 +57,8 @@ The BME280 uses a 3V3 supply. This test is being performed on an ESP8266 mini wh
 
 * Removing all serial output causes the app to misbehave. I've spent over an hour trying to sort that and am setting it aside for the moment.
 * Adding NTP support was surprisingly easy as it's already built into the Arduino runtime.
- 
+* Add sleep to main loop? No. `delay(millis)` blocks and starves the MQTT processing. I have added a 1000 ms delay because it just rubs me wrong to have a compute bound loop.
+
 ## Build reports
 
 Build reports now in a [separate page](Build_Reports.md)
