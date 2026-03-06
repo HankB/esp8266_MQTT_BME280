@@ -35,9 +35,9 @@ PubSubClient client(espClient);
 unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE (50)
 char msg[MSG_BUFFER_SIZE];
-int value = 0;
+//int value = 0;
 Adafruit_BME280 bme; // I2C
-time_t      world_time;
+//time_t      world_time;
 
 void setup_wifi() {
 
@@ -110,20 +110,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 #endif
-
-  char buff[100];
-  length = (length>99)?99:length;
-  for (unsigned int i = 0; i < length; i++)
-    buff[i] = (char)payload[i];
-  buff[length] = '\0';
-
-  // TODO figure out what world_time is (comes upo zero)
-  world_time = atol(buff);
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1')
-    digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on
-  else
-    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off
 }
 
 void reconnect() {
@@ -138,12 +124,8 @@ void reconnect() {
     // Attempt to connect
     if (client.connect(clientId.c_str())) {
 #if serial_IO
-      Serial.println("connected");
+      Serial.println("MQTT connected");
 #endif
-      // Once connected, publish an announcement...
-      client.publish("outTopic", "PIO says hello world");
-      // ... and resubscribe
-      client.subscribe("inTopic");
     } else {
 #if serial_IO
       Serial.print("failed, rc=");
