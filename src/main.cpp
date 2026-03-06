@@ -10,7 +10,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <Wire.h>
-//#include <SPI.h>
+// #include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include "time.h"
@@ -22,7 +22,7 @@ const char* password = "...";
 const char* mqtt_server = "host.domain"; // "<host>.localddomain" works for me.
 */
 
-#define serial_IO 1     // control compilation of serial I/O
+#define serial_IO 1 // control compilation of serial I/O
 // NOTE: currently turning off Serial I/O rsults in an app that does not work.
 
 WiFiClient espClient;
@@ -31,10 +31,11 @@ unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE (200)
 char payload[MSG_BUFFER_SIZE];
 Adafruit_BME280 bme; // I2C
-String hostname="who-me?";
+String hostname = "who-me?";
 String topic;
 
-void setup_wifi() {
+void setup_wifi()
+{
 
   delay(10);
   // We start by connecting to a WiFi network
@@ -47,19 +48,20 @@ void setup_wifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
 #if serial_IO
     delay(500);
     Serial.print(".");
 #else
-    digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on 
+    digitalWrite(LED_BUILTIN, LOW); // Turn the LED on
     delay(100);
-    digitalWrite(LED_BUILTIN, HIGH);   // Turn the LED off 
+    digitalWrite(LED_BUILTIN, HIGH); // Turn the LED off
     delay(400);
 #endif
-// build topic
-    hostname=WiFi.hostname();
-    topic = "HA/"+hostname+"/lab/temp_humidity_press";
+    // build topic
+    hostname = WiFi.hostname();
+    topic = "HA/" + hostname + "/lab/temp_humidity_press";
   }
 
   randomSeed(micros());
@@ -72,34 +74,41 @@ void setup_wifi() {
 #endif
 }
 
-void setup_BME280(void) {
+void setup_BME280(void)
+{
   // configure BME280/I2C
   Wire.begin(D3, D4); // Make sure you have D3 & D4 hooked up to the BME280
   Wire.setClock(100000);
   unsigned status = bme.begin(0x76);
-  if (!status) {
+  if (!status)
+  {
 #if serial_IO
-      Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
-      Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
-      Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
-      Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
-      Serial.print("        ID of 0x60 represents a BME 280.\n");
-      Serial.print("        ID of 0x61 represents a BME 680.\n");
-      while (1) delay(10);
+    Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
+    Serial.print("SensorID was: 0x");
+    Serial.println(bme.sensorID(), 16);
+    Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
+    Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
+    Serial.print("        ID of 0x60 represents a BME 280.\n");
+    Serial.print("        ID of 0x61 represents a BME 680.\n");
+    while (1)
+      delay(10);
 #else
-      while(1) {
-        digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on 
-        delay(100);
-        digitalWrite(LED_BUILTIN, HIGH);   // Turn the LED off 
-        delay(90);
-      }
+    while (1)
+    {
+      digitalWrite(LED_BUILTIN, LOW); // Turn the LED on
+      delay(100);
+      digitalWrite(LED_BUILTIN, HIGH); // Turn the LED off
+      delay(90);
+    }
 #endif
   }
 }
 
-void reconnect() {
+void reconnect()
+{
   // Loop until we're reconnected
-  while (!mqttClient.connected()) {
+  while (!mqttClient.connected())
+  {
 #if serial_IO
     Serial.print("Attempting MQTT connection...");
 #endif
@@ -107,66 +116,74 @@ void reconnect() {
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
     // Attempt to connect
-    if (mqttClient.connect(clientId.c_str())) {
+    if (mqttClient.connect(clientId.c_str()))
+    {
 #if serial_IO
       Serial.println("MQTT connected");
 #endif
-    } else {
+    }
+    else
+    {
 #if serial_IO
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
       Serial.println(" try again in 5 seconds");
 #endif
       // Wait 5 seconds before retrying
-      digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on 
+      digitalWrite(LED_BUILTIN, LOW); // Turn the LED on
       delay(20);
-      digitalWrite(LED_BUILTIN, HIGH);   // Turn the LED off 
+      digitalWrite(LED_BUILTIN, HIGH); // Turn the LED off
       delay(4980);
     }
   }
 }
 
 #if serial_IO
-void printValues(void) {
-    Serial.print("Temperature = ");
-    Serial.print(bme.readTemperature());
-    Serial.println(" °C");
+void printValues(void)
+{
+  Serial.print("Temperature = ");
+  Serial.print(bme.readTemperature());
+  Serial.println(" °C");
 
-    Serial.print("Pressure = ");
-    Serial.print(bme.readPressure() / 100.0F);
-    Serial.println(" hPa");
+  Serial.print("Pressure = ");
+  Serial.print(bme.readPressure() / 100.0F);
+  Serial.println(" hPa");
 
-    Serial.print("Humidity = ");
-    Serial.print(bme.readHumidity());
-    Serial.println(" %");
+  Serial.print("Humidity = ");
+  Serial.print(bme.readHumidity());
+  Serial.println(" %");
 
-    Serial.println();
+  Serial.println();
 }
 #endif
 
 // NTP server to request epoch time
-const char* ntpServer = "pool.ntp.org";
+const char *ntpServer = "pool.ntp.org";
 
 // Variable to save current epoch time
-unsigned long epochTime; 
+unsigned long epochTime;
 
 // Function that gets current epoch time
-unsigned long getTime() {
+unsigned long getTime()
+{
   time_t now;
   struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
-    //Serial.println("Failed to obtain time");
-    return(0);
+  if (!getLocalTime(&timeinfo))
+  {
+    // Serial.println("Failed to obtain time");
+    return (0);
   }
   time(&now);
   return now;
 }
 
-void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
+void setup()
+{
+  pinMode(LED_BUILTIN, OUTPUT); // Initialize the LED_BUILTIN pin as an output
 #if serial_IO
   Serial.begin(115200);
-  while(!Serial);    // time to get serial running
+  while (!Serial)
+    ; // time to get serial running
 #endif
   setup_wifi();
   setup_BME280();
@@ -174,29 +191,32 @@ void setup() {
   configTime(0, 0, ntpServer);
 }
 
-void loop() {
+void loop()
+{
   time_t curtime;
-  if (!mqttClient.connected()) {
+  if (!mqttClient.connected())
+  {
     reconnect();
   }
   mqttClient.loop();
 
   unsigned long now = millis();
-  if (now - lastMsg > 2000) {
+  if (now - lastMsg > 2000)
+  {
     lastMsg = now;
     curtime = time(0);
-    // fetch heap stats 
+    // fetch heap stats
     uint32_t free;
     uint32_t max;
     uint8_t frag;
     ESP.getHeapStats(&free, &max, &frag);
 
-    snprintf (payload, MSG_BUFFER_SIZE, 
-        "{\"t\":%lld, \"temp\":%.2f, \"press\":%.2f, \"humid\":%.2f, "
-        "\"heap\":{\"free\":%7u, \"max\":%7u, \"frag\":%3d}, \"device\":\"BME280\"}", 
-      curtime, bme.readTemperature()/5*9+32.0,
-      bme.readPressure()/100, bme.readHumidity(),
-    free, max, frag);
+    snprintf(payload, MSG_BUFFER_SIZE,
+             "{\"t\":%lld, \"temp\":%.2f, \"press\":%.2f, \"humid\":%.2f, "
+             "\"heap\":{\"free\":%7u, \"max\":%7u, \"frag\":%3d}, \"device\":\"BME280\"}",
+             curtime, bme.readTemperature() / 5 * 9 + 32.0,
+             bme.readPressure() / 100, bme.readHumidity(),
+             free, max, frag);
     mqttClient.publish(topic.c_str(), payload);
 #if serial_IO
     Serial.print("Publish message: ");
