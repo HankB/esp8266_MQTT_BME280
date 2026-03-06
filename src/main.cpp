@@ -138,7 +138,7 @@ void reconnect()
   }
 }
 
-#if serial_IO
+#if serial_IO > 1
 void printValues(void)
 {
   Serial.print("Temperature = ");
@@ -218,7 +218,7 @@ void loop()
              bme.readPressure() / 100, bme.readHumidity(),
              free, max, frag);
     mqttClient.publish(topic.c_str(), payload);
-#if serial_IO
+#if serial_IO > 1
     Serial.print("Publish message: ");
     Serial.println(payload);
     printValues();
