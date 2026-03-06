@@ -1,6 +1,6 @@
 # esp8266_MQTT_BME280
 
-Use <https://github.com/HankB/mqtt_esp8266_PIO> as a starting point for a project to use the BME280 to report temperature and other conditions.
+Use <https://github.com/HankB/ESP8266-NTP-MQTT-Time> as a starting point for a project to use the BME280 to report temperature and other conditions.
 
 This repo uses the PlatformIO tool chain.
 
