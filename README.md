@@ -23,13 +23,13 @@ Need to monitor temperature and have BME280 sensors to do so. Trying as an alter
 
 ## Usage
 
-Development has been performed on Debian Linux and using the `mosquitto` MQTT broker and client utilities. Development begins using the NodeMCU ESP-E12.
+Development has been performed on Debian Linux and using the `mosquitto` MQTT broker and client utilities. Development begins using the NodeMCU ESP-E12 and continues with an ESP8266 mini.
 
 ### PlatformIO
 
 1. Download and build the project using VS Code/PlatformIO. 
 1. Use `minicom --device /dev/ttyUSB0` to view progress message. On my host the ESP8266 (NodeMCU) comes up as `/dev/ttyUSB0`. You will need to exit `minicom` in order to download from PlatformIO.
-1. Interact with MQTT messages using `mosquitto_sub -v -t outTopic` to receive messages and `mosquitto_pub -t inTopic -m "hello back"` to publish. 
+1. Interact with MQTT messages using `mosquitto_sub -v -t outTopic` to receive messages. 
 1. Monitor activity from the viewpoint of the MQTT broker using `sudo tail -f /var/log/mosquitto/mosquitto.log`.
 
 ## Status
@@ -40,13 +40,16 @@ Development has been performed on Debian Linux and using the `mosquitto` MQTT br
 * Publish BME280 readings
 * Conditional serial I/O (working only with serial enabled)
 
+## Localization
+
+For my particular needs the topic will look like `HA/{hostname}/{location or ID?}/temp_humidity_press` and the JSON formatted payload `{"t":1772807575, "temp":73.44, "press":988, "humid":42, "device":"BME280"}`.
+
 ## Todo
 
 For my particular application:
 
-* Format payload as JSON.
 * Set timing of samples to 1/minute.
-* The code comes up with a unique hostname based on the MAC address `ESP-533BE6`. Find the api to fetch the hostname to include in the topic.
+* Add sleep to main loop?
 
 ## 2026-03-05 wiring
 

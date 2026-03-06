@@ -26,13 +26,13 @@ const char* mqtt_server = "host.domain"; // "<host>.localddomain" works for me.
 // NOTE: currently turning off Serial I/O rsults in an app that does not work.
 
 WiFiClient espClient;
-PubSubClient client(espClient);
+PubSubClient mqttClient(espClient);
 unsigned long lastMsg = 0;
-#define MSG_BUFFER_SIZE (50)
-char msg[MSG_BUFFER_SIZE];
-//int value = 0;
+#define MSG_BUFFER_SIZE (128)
+char payload[MSG_BUFFER_SIZE];
 Adafruit_BME280 bme; // I2C
-//time_t      world_time;
+String hostname="who-me?";
+String topic;
 
 void setup_wifi() {
 
@@ -57,6 +57,9 @@ void setup_wifi() {
     digitalWrite(LED_BUILTIN, HIGH);   // Turn the LED off 
     delay(400);
 #endif
+// build topic
+    hostname=WiFi.hostname();
+    topic = "HA/"+hostname+"/lab/temp_humidity_press";
   }
 
   randomSeed(micros());
@@ -65,7 +68,7 @@ void setup_wifi() {
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  Serial.println(topic);
 #endif
 }
 
@@ -96,7 +99,7 @@ void setup_BME280(void) {
 
 void reconnect() {
   // Loop until we're reconnected
-  while (!client.connected()) {
+  while (!mqttClient.connected()) {
 #if serial_IO
     Serial.print("Attempting MQTT connection...");
 #endif
@@ -104,14 +107,14 @@ void reconnect() {
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
     // Attempt to connect
-    if (client.connect(clientId.c_str())) {
+    if (mqttClient.connect(clientId.c_str())) {
 #if serial_IO
       Serial.println("MQTT connected");
 #endif
     } else {
 #if serial_IO
       Serial.print("failed, rc=");
-      Serial.print(client.state());
+      Serial.print(mqttClient.state());
       Serial.println(" try again in 5 seconds");
 #endif
       // Wait 5 seconds before retrying
@@ -167,28 +170,29 @@ void setup() {
 #endif
   setup_wifi();
   setup_BME280();
-  client.setServer(mqtt_server, 1883);
+  mqttClient.setServer(mqtt_server, 1883);
   configTime(0, 0, ntpServer);
 }
 
 void loop() {
   time_t curtime;
-  if (!client.connected()) {
+  if (!mqttClient.connected()) {
     reconnect();
   }
-  client.loop();
+  mqttClient.loop();
 
   unsigned long now = millis();
   if (now - lastMsg > 2000) {
     lastMsg = now;
     curtime = time(0);
-    snprintf (msg, MSG_BUFFER_SIZE, "t:%lld, temp:%.2f, press:%.0f, humid:%.1f", 
+    snprintf (payload, MSG_BUFFER_SIZE, 
+        "{\"t\":%lld, \"temp\":%.2f, \"press\":%.2f, \"humid\":%.2f, \"device\":\"BME280\"}", 
       curtime, bme.readTemperature()/5*9+32.0,
       bme.readPressure()/100, bme.readHumidity());
-    client.publish("outTopic", msg);
+    mqttClient.publish(topic.c_str(), payload);
 #if serial_IO
     Serial.print("Publish message: ");
-    Serial.println(msg);
+    Serial.println(payload);
     printValues();
 #endif
   }
