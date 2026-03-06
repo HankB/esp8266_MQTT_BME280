@@ -10,7 +10,6 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <Wire.h>
-// #include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include "time.h"
@@ -23,7 +22,7 @@ const char* mqtt_server = "host.domain"; // "<host>.localddomain" works for me.
 */
 
 #define serial_IO 1 // control compilation of serial I/O
-// NOTE: currently turning off Serial I/O rsults in an app that does not work.
+// NOTE: currently turning off Serial I/O results in an app that does not work.
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
@@ -91,7 +90,7 @@ void setup_BME280(void)
     Serial.print("        ID of 0x60 represents a BME 280.\n");
     Serial.print("        ID of 0x61 represents a BME 680.\n");
     while (1)
-      delay(10);
+      delay(10); // hard lockup - might be better to publish an error indicator.
 #else
     while (1)
     {
@@ -194,34 +193,52 @@ void setup()
 void loop()
 {
   time_t curtime;
+
   if (!mqttClient.connected())
   {
     reconnect();
   }
   mqttClient.loop();
 
-  unsigned long now = millis();
-  if (now - lastMsg > 2000)
-  {
-    lastMsg = now;
-    curtime = time(0);
-    // fetch heap stats
-    uint32_t free;
-    uint32_t max;
-    uint8_t frag;
-    ESP.getHeapStats(&free, &max, &frag);
+  curtime = time(0);
 
-    snprintf(payload, MSG_BUFFER_SIZE,
-             "{\"t\":%lld, \"temp\":%.2f, \"press\":%.2f, \"humid\":%.2f, "
-             "\"heap\":{\"free\":%7u, \"max\":%7u, \"frag\":%3d}, \"device\":\"BME280\"}",
-             curtime, bme.readTemperature() / 5 * 9 + 32.0,
-             bme.readPressure() / 100, bme.readHumidity(),
-             free, max, frag);
-    mqttClient.publish(topic.c_str(), payload);
+  if (curtime > 1772815188) // only publish once we have time sync
+  {
+    unsigned long now = millis();
+
+    if ((lastMsg == 0) || (now - lastMsg > 1000 * 60))
+    {
+      lastMsg = now;
+
+      // fetch heap stats
+      uint32_t free;
+      uint32_t max;
+      uint8_t frag;
+      ESP.getHeapStats(&free, &max, &frag);
+
+      snprintf(payload, MSG_BUFFER_SIZE,
+               "{\"t\":%lld, \"temp\":%.2f, \"press\":%.2f, \"humid\":%.2f, "
+               "\"heap\":{\"free\":%7u, \"max\":%7u, \"frag\":%3d}, \"device\":\"BME280\"}",
+               curtime, bme.readTemperature() / 5 * 9 + 32.0,
+               bme.readPressure() / 100, bme.readHumidity(),
+               free, max, frag);
+      mqttClient.publish(topic.c_str(), payload);
 #if serial_IO > 1
-    Serial.print("Publish message: ");
-    Serial.println(payload);
-    printValues();
+      Serial.print("Publish message: ");
+      Serial.println(payload);
+      printValues();
+#endif
+    }
+    else
+    {
+      delay(1000);
+    }
+  }
+  else
+  {
+#if serial_IO > 1
+    Serial.println("waiting for NTP sync");
+    delay(1000);
 #endif
   }
 }
