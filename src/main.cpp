@@ -28,7 +28,7 @@ const char* mqtt_server = "host.domain"; // "<host>.localddomain" works for me.
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 unsigned long lastMsg = 0;
-#define MSG_BUFFER_SIZE (128)
+#define MSG_BUFFER_SIZE (200)
 char payload[MSG_BUFFER_SIZE];
 Adafruit_BME280 bme; // I2C
 String hostname="who-me?";
@@ -185,10 +185,18 @@ void loop() {
   if (now - lastMsg > 2000) {
     lastMsg = now;
     curtime = time(0);
+    // fetch heap stats 
+    uint32_t free;
+    uint32_t max;
+    uint8_t frag;
+    ESP.getHeapStats(&free, &max, &frag);
+
     snprintf (payload, MSG_BUFFER_SIZE, 
-        "{\"t\":%lld, \"temp\":%.2f, \"press\":%.2f, \"humid\":%.2f, \"device\":\"BME280\"}", 
+        "{\"t\":%lld, \"temp\":%.2f, \"press\":%.2f, \"humid\":%.2f, "
+        "\"heap\":{\"free\":%7u, \"max\":%7u, \"frag\":%3d}, \"device\":\"BME280\"}", 
       curtime, bme.readTemperature()/5*9+32.0,
-      bme.readPressure()/100, bme.readHumidity());
+      bme.readPressure()/100, bme.readHumidity(),
+    free, max, frag);
     mqttClient.publish(topic.c_str(), payload);
 #if serial_IO
     Serial.print("Publish message: ");
