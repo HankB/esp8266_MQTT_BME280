@@ -4,7 +4,7 @@ Use <https://github.com/HankB/ESP8266-NTP-MQTT-Time> as a starting point for a p
 
 This repo uses the PlatformIO tool chain.
 
-Hardware is `NodeMCU 1.0 (ESP-12E Module)`.
+Hardware is `NodeMCU 1.0 (ESP-12E Module)` and clone `Wemos D1 Mini`.
 
 ## Credits
 
@@ -34,6 +34,7 @@ Development has been performed on Debian Linux and using the `mosquitto` MQTT br
 
 ## Status
 
+* 2026-03-05 Fetching time from an NTP server.
 * 2026-03-05 Builds and runs using VS Code/PlatformIO. (After installing udev rules <https://docs.platformio.org/en/latest/core/installation/udev-rules.html>.) Connected a BME280 as described below and MQTT messages are published along with readings to the serial console.
 * Test imported (unchanged) project - works
 * Publish BME280 readings
@@ -43,7 +44,6 @@ Development has been performed on Debian Linux and using the `mosquitto` MQTT br
 
 For my particular application:
 
-* Get time from an NTP server.
 * Format payload as JSON.
 * Set timing of samples to 1/minute.
 * The code comes up with a unique hostname based on the MAC address `ESP-533BE6`. Find the api to fetch the hostname to include in the topic.

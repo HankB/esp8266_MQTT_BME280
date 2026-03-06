@@ -18,6 +18,7 @@
 //#include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include "time.h"
 
 #include "secrets.h"
 /* secrets.h should define the following as appropriate for your network.
@@ -116,6 +117,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     buff[i] = (char)payload[i];
   buff[length] = '\0';
 
+  // TODO figure out what world_time is (comes upo zero)
   world_time = atol(buff);
   // Switch on the LED if an 1 was received as first character
   if ((char)payload[0] == '1')
@@ -175,6 +177,24 @@ void printValues(void) {
 }
 #endif
 
+// NTP server to request epoch time
+const char* ntpServer = "pool.ntp.org";
+
+// Variable to save current epoch time
+unsigned long epochTime; 
+
+// Function that gets current epoch time
+unsigned long getTime() {
+  time_t now;
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    //Serial.println("Failed to obtain time");
+    return(0);
+  }
+  time(&now);
+  return now;
+}
+
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
 #if serial_IO
@@ -185,10 +205,11 @@ void setup() {
   setup_BME280();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+  configTime(0, 0, ntpServer);
 }
 
 void loop() {
-
+  time_t curtime;
   if (!client.connected()) {
     reconnect();
   }
@@ -197,8 +218,9 @@ void loop() {
   unsigned long now = millis();
   if (now - lastMsg > 2000) {
     lastMsg = now;
+    curtime = time(0);
     snprintf (msg, MSG_BUFFER_SIZE, "t:%lld, temp:%.2f, press:%.0f, humid:%.1f", 
-      world_time, bme.readTemperature()/5*9+32.0,
+      curtime, bme.readTemperature()/5*9+32.0,
       bme.readPressure()/100, bme.readHumidity());
     client.publish("outTopic", msg);
 #if serial_IO
