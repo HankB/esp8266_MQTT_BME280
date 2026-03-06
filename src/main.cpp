@@ -1,11 +1,6 @@
 /*
  Basic ESP8266 MQTT example ... now heavily modified.
  - Associate with AP and connect to MQTT broker.
- - Subscribe to a message that will 
-    1) provide a timestamp and 2) trigger 
-    2) trigger publication of conditions read from the BME280
- - When the message arrives, extract the timestamp, read the BME280 
-   and publish the results (in the callback)
 
  Alternatives
   Subscribe to an NTP server and be independant of the other
@@ -99,19 +94,6 @@ void setup_BME280(void) {
   }
 }
 
-// Parse timestamp from inbound message
-void callback(char* topic, byte* payload, unsigned int length) {
-#if serial_IO
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (unsigned int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
-#endif
-}
-
 void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
@@ -186,7 +168,6 @@ void setup() {
   setup_wifi();
   setup_BME280();
   client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
   configTime(0, 0, ntpServer);
 }
 
