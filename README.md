@@ -34,7 +34,7 @@ Development has been performed on Debian Linux and using the `mosquitto` MQTT br
 
 ## Status
 
-* 2026-03-16 Three of these are all reporting wild results. Loking into it now.
+* 2026-03-16 Three of these are all reporting wild results. Looking into it now.
 * 2026-03-06 Finished for now. Application publishes 1/min using topic and payload formats that meet my requirements. There is some tailoring required to use my "production" AP and MQTT broker and tweak the topic.
 * 2026-03-05 Fetching time from an NTP server.
 * 2026-03-05 Builds and runs using VS Code/PlatformIO. (After installing udev rules <https://docs.platformio.org/en/latest/core/installation/udev-rules.html>.) Connected a BME280 as described below and MQTT messages are published along with readings to the serial console.
