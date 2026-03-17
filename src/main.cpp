@@ -60,7 +60,7 @@ void setup_wifi()
 #endif
     // build topic
     hostname = WiFi.hostname();
-    topic = "HA/" + hostname + "/lab/temp_humidity_press";
+    topic = "HA/" + hostname + "/blue_bedroom/temp_humidity_press";
   }
 
   randomSeed(micros());
@@ -68,7 +68,8 @@ void setup_wifi()
 #if serial_IO
   Serial.println("");
   Serial.println("WiFi connected");
-  Serial.println("IP address: ");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
   Serial.println(topic);
 #endif
 }
