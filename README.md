@@ -53,6 +53,13 @@ For my particular needs the topic will look like `HA/{hostname}/{location or ID?
 
 The BME280 uses a 3V3 supply. This test is being performed on an ESP8266 mini whiuch has 3V3 closest to the reset pushbutton. Ground is next to the 5V pin. Pin marked D4/mini goes to SCL/BME280 and pin D3/mini goes to SDA/BME280.
 
+|ESP Pin ID|BME Pin ID|
+|---|---|
+|3V3|VIN|
+|G|GND|
+|D3|SDA|
+|D4|SCL|
+
 ## Errata
 
 * Removing all serial output causes the app to misbehave. I've spent over an hour trying to sort that and am setting it aside for the moment.
