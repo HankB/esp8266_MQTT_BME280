@@ -34,6 +34,7 @@ Development has been performed on Debian Linux and using the `mosquitto` MQTT br
 
 ## Status
 
+* 2026-03-16 Apparently I didn't have enough serial output to the console. I cranked that up a bit and now results look correct.
 * 2026-03-16 Three of these are all reporting wild results. Looking into it now.
 * 2026-03-06 Finished for now. Application publishes 1/min using topic and payload formats that meet my requirements. There is some tailoring required to use my "production" AP and MQTT broker and tweak the topic.
 * 2026-03-05 Fetching time from an NTP server.
@@ -66,6 +67,12 @@ The BME280 uses a 3V3 supply. This test is being performed on an ESP8266 mini wh
 * Removing all serial output causes the app to misbehave. I've spent over an hour trying to sort that and am setting it aside for the moment.
 * Adding NTP support was surprisingly easy as it's already built into the Arduino runtime.
 * Add sleep to main loop? No. `delay(millis)` blocks and starves the MQTT processing. I have added a 1000 ms delay because it just rubs me wrong to have a compute bound loop.
+* Different results depending on how much serial output there is to the console:
+
+```text
+HA/ESP-52EF1C/blue_bedroom/temp_humidity_press {"t":1773712773, "temp":365.16, "press":-134.52, "humid":100.00, "heap":{"free":  46912, "max":  46480, "frag":  1}, "device":"BME280"}
+HA/ESP-52EF1C/blue_bedroom/temp_humidity_press {"t":1773713212, "temp":70.59, "press":986.14, "humid":38.36, "heap":{"free":  48776, "max":  48576, "frag":  1}, "device":"BME280"}
+```
 
 ## Build reports
 
