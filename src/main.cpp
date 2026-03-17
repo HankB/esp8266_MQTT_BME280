@@ -21,8 +21,12 @@ const char* password = "...";
 const char* mqtt_server = "host.domain"; // "<host>.localddomain" works for me.
 */
 
-#define serial_IO 1 // control compilation of serial I/O
+#define serial_IO 2 // control compilation of serial I/O
 // NOTE: currently turning off Serial I/O results in an app that does not work.
+// setting it to 1 results in an app thet produces wildly wrong results.
+// calling printValues() adfter publishing truncates some results printed 
+//to the console.
+// I really don't like the Arduino framework. 
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
@@ -138,7 +142,7 @@ void reconnect()
   }
 }
 
-#if serial_IO > 1
+#if serial_IO > 2
 void printValues(void)
 {
   Serial.print("Temperature = ");
@@ -227,7 +231,7 @@ void loop()
 #if serial_IO > 1
       Serial.print("Publish message: ");
       Serial.println(payload);
-      printValues();
+      //printValues();
 #endif
     }
     else
